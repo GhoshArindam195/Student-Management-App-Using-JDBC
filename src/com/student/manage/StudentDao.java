@@ -1,6 +1,7 @@
 package com.student.manage;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -17,19 +18,65 @@ public class StudentDao
 		{
 			//JDBC code...
 			Connection con= CP.createC();
-			String quary="insert into students(sname,sphone,scity) values(?,?,?)";
 			
-			//PreparedStatement
-			PreparedStatement pstmt = con.prepareStatement(quary);
+			DatabaseMetaData dbm = con.getMetaData();
 			
-			//set the value of parameters
-			pstmt.setString(1,st.getStudentName());
-			pstmt.setString(2,st.getStudentPhone());
-			pstmt.setString(3,st.getStudentCity());
-			
-			//Execute
-			pstmt.executeUpdate();
-			f=true;
+			// check if "employee" table is there.......
+			ResultSet tables = dbm.getTables(null, null, "employee", null);
+			if (tables.next()) {
+			  // Table exists.......
+				//Now insert data.........
+				
+				String quary="insert into students(sname,sphone,scity) values(?,?,?)";
+				
+				//PreparedStatement
+				PreparedStatement pstmt = con.prepareStatement(quary);
+				
+				//set the value of parameters
+				pstmt.setString(1,st.getStudentName());
+				pstmt.setString(2,st.getStudentPhone());
+				pstmt.setString(3,st.getStudentCity());
+				
+				//Execute
+				pstmt.executeUpdate();
+				f=true;
+			}
+			else 
+			{
+			  // Table does not exist
+				Statement stmt = con.createStatement();
+				String sql = "CREATE TABLE students " +
+		                   "(sid INTEGER not NULL AUTO_INCREMENT, " +
+		                   " sname VARCHAR(255), " + 
+		                   " sphone VARCHAR(255), " + 
+		                   " sphone VARCHAR(255), " + 
+		                   " PRIMARY KEY ( id ))"; 
+
+				if(stmt.executeUpdate(sql)!=0)
+			    {
+			    	  //Table created..............
+					//Now insert data.........
+					
+					String quary="insert into students(sname,sphone,scity) values(?,?,?)";
+					
+					//PreparedStatement
+					PreparedStatement pstmt = con.prepareStatement(quary);
+					
+					//set the value of parameters
+					pstmt.setString(1,st.getStudentName());
+					pstmt.setString(2,st.getStudentPhone());
+					pstmt.setString(3,st.getStudentCity());
+					
+					//Execute
+					pstmt.executeUpdate();
+					f=true;
+			    	  
+			    }
+				else 
+				{
+					System.out.println("Failed to create table....try again!");
+				}
+			}
 		}
 		catch (Exception e) 
 		{
